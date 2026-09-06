@@ -220,6 +220,11 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
+- ✅ **v80 — BUG dos monstros cortados "pela metade" corrigido de novo (âncora do canvas de sprites)**:
+  - Sintoma (foto do Ronald no deitado): mobs apareciam recortados. Causa: em `mobRenderCv` (bloco `v50 — mobs em pixel art`) a âncora do canvas offscreen estava na versão bugada `const g=cv.getContext('2d'),ax=W/2-minX,ay=H/2-minY;` — como `pxMobRows` desenha cada sprite CENTRALIZADO na coordenada dada (`ox=cx-w*s/2, oy=cy-rows.length*s/2`), com `ax=W/2-minX` o corpo local (de `-bw/2` a `+bw/2`) caía em `W/2`...`W/2+bw`, deslocando o conteúdo em meia largura e cortando ~metade do corpo fora do canvas. A correção histórica (v53/v55) `ax=-minX, ay=-minY` tinha se perdido no código publicado.
+  - Fix aplicado: `const g=cv.getContext('2d'),ax=-minX,ay=-minY;` (com comentário `v79b: correcao definitiva de recorte dos mobs`). Assim, com o `drawImage` do `pxMobDraw` centrado em `(cx,cy+bob)`, todo o corpo (inclusive partes/peças que saem da grade base) fica 100% dentro do canvas. Mesma lógica validada antes (testes A/B de diff pixel-a-pixel deram 0.000% no passado).
+  - Marcadores p/ curl: `correcao definitiva de recorte dos mobs`, `ax=-minX,ay=-minY`. Save 100% compatível (só render). sw.js → `arcana-v80`.
+
 - ✅ **v79 — Barra 1-6 coladinha no analógico de ataque (sem vão) + chat ainda mais embaixo**:
   - Sobre a v78 (que resolveu a barra no topo via `top:auto`): o vão entre a casa 5 e o analógico vinha da grade `repeat(6,Npx)` reservando a 6ª coluna (poder secreto `display:none`). Troca para `grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:{N}px` (só casas visíveis ocupam espaço) nas 3 camadas → a casa 5 encosta no analógico (`right:128/112/104px`, gap ~2-4px).
   - Chat desceu: normal `bottom:6px`, compacta `bottom:30px`, ultra `bottom:34px` (aberto sobe a 66px).

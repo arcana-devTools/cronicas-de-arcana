@@ -6515,7 +6515,9 @@ function mobRenderCv(rows,s,flip,basePal,parts){
   for(const q of quads){minX=Math.min(minX,q.ox-q.pw/2);maxX=Math.max(maxX,q.ox+q.pw/2);minY=Math.min(minY,q.oy-q.ph/2);maxY=Math.max(maxY,q.oy+q.ph/2);}
   const W=Math.max(1,Math.ceil(maxX-minX)),H=Math.max(1,Math.ceil(maxY-minY));
   const cv=document.createElement('canvas');cv.width=W;cv.height=H;
-  const g=cv.getContext('2d'),ax=W/2-minX,ay=H/2-minY;
+  // v79b: correcao definitiva de recorte dos mobs — ancora em ax=-minX, ay=-minY
+  // (antes era W/2-minX, que deslocava o corpo em meia largura e cortava 75% dos monstros)
+  const g=cv.getContext('2d'),ax=-minX,ay=-minY;
   for(const q of quads)if(q.grp==='back')pxMobRows(g,ax+q.ox,ay+q.oy,s,q.rows,q.pal,flip);
   pxMobRows(g,ax,ay,s,rows,basePal,flip);
   for(const q of quads)if(q.grp==='front')pxMobRows(g,ax+q.ox,ay+q.oy,s,q.rows,q.pal,flip);
