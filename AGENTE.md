@@ -220,11 +220,16 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
-- ✅ **v78 — CORREÇÃO DEFINITIVA da barra 1-6 alta (regra antiga top:115px) + chat ainda mais embaixo**:
-  - **Causa raiz real** (a trava da v77 não bastou): existem duas regras MÓVEIS ANTIGAS fora do `@media landscape` — `.mobile-quickbar{position:absolute!important;right:72px!important;top:115px!important;transform:scale(.9);transform-origin:top right}` e `.mobile-smart-actions{...top:115px;...flex-direction:column...}`. A barra de habilidades tinha `top:115px!important` e NÃO tinha `top:auto` na CSS de paisagem → para elemento absoluto com altura definida e `top`+`bottom` simultâneos, o `top` vence e o `bottom` é ignorado. Resultado: a fileira 1-6 ficava ancorada no TOPO (meio da tela), exatamente nas fotos. O arraste não era a causa (a trava já o anulava).
-  - Fix no bloco landscape: `.mobile-quickbar{top:auto!important;transform:none!important}` (zera o top antigo e o scale .9, deixando valer o `bottom:12`) e `.mobile-smart-actions{top:auto!important;right:0;bottom:0;left:0;transform:none;flex-direction:initial;...}` (anula o container antigo que era flex-col ancorado em top:115 — assim os botões usam o inset:0 do touch-ui). Camada ultra também corrigida (quickbar right:108).
-  - **Chat mais embaixo**: normal `bottom:8px` (era 16), ainda centralizado (`left:50%`).
-  - Migração renovada para flag `arcana-touch-layout-v === 'v78'`. Marcador: `Anula as regras antigas que prendiam`. Save 100% compatível (só CSS/UI). sw.js → `arcana-v78`.
+- ✅ **v79 — Barra 1-6 coladinha no analógico de ataque (sem vão) + chat ainda mais embaixo**:
+  - Sobre a v78 (que resolveu a barra no topo via `top:auto`): o vão entre a casa 5 e o analógico vinha da grade `repeat(6,Npx)` reservando a 6ª coluna (poder secreto `display:none`). Troca para `grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:{N}px` (só casas visíveis ocupam espaço) nas 3 camadas → a casa 5 encosta no analógico (`right:128/112/104px`, gap ~2-4px).
+  - Chat desceu: normal `bottom:6px`, compacta `bottom:30px`, ultra `bottom:34px` (aberto sobe a 66px).
+  - sw.js → `arcana-v79`; migração flag → v79.
+
+- ✅ **v78 — CORREÇÃO DEFINITIVA da barra 1-6 (regra antiga top:115px) + barra colada no analógico + chat mais embaixo**:
+  - **Causa raiz real** (a trava da v77 não bastou): existem duas regras MÓVEIS ANTIGAS fora do `@media landscape` — `.mobile-quickbar{...top:115px!important;transform:scale(.9);transform-origin:top right}` e `.mobile-smart-actions{...top:115px;...flex-direction:column...}`. Com `top`+`bottom` simultâneos em elemento absoluto, o `top` vence e o `bottom` é ignorado → a fileira 1-6 ficava ancorada no TOPO (meio da tela). Fix no bloco landscape: `.mobile-quickbar{top:auto!important;transform:none!important}` e `.mobile-smart-actions{top:auto!important;right:0;bottom:0;left:0;transform:none;flex-direction:initial;...}`.
+  - **Barra colada no analógico (some o vão da casa 6):** a grade `repeat(6,40px)` reservava a 6ª coluna (poder secreto escondido por `display:none`), criando ~40px de vão entre a casa 5 e o analógico. Fix: `grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:{tamanho}` (só casas visíveis geram coluna). Ancoragem `right:128/112/104px` (gap ~2-4px).
+  - **Chat mais embaixo**: normal `bottom:6px`, compacta `bottom:30px`, ultra `bottom:34px` (aberto sobe para 66px), centralizado `left:50%`. Migração flag → `arcana-touch-layout-v === 'v78'`.
+  - Marcadores: `Anula as regras antigas que prendiam`, `grid-auto-flow:column`, `v78 — LAYOUT PAISAGEM`. Save 100% compatível (só CSS/UI). sw.js → `arcana-v78`.
 
 - ✅ **v77 — TRAVA de layout no deitado (barra 1-6 voltava para cima)**:
   - Causa raiz: a barra 1-6 que ficava no meio da tela era o próprio `#mobileQuickbar` (DOM). O editor de HUD salva o arraste em `buttonPos.quick-*` / transform do `.touch-ui` e aplica via `el.style.translate`/`.touch-ui{transform}` (inline, aplicado por `applyHUDCustomTouch`). A CSS de posição (`right/bottom`) só move a âncora — o `translate` inline vencia o CSS (inline > stylesheet mesmo sem !important), então a barra arrastada continuava alta. O editor de HUD no celular deixa os controles vulneráveis a esse deslocamento acidental.
