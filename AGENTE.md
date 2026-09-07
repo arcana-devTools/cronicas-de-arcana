@@ -220,6 +220,12 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
+- ✅ **v87 — Revisão visual bicho a bicho (4ª leva: sapo, morcego e fantasmas)**:
+  - **Sapo (`frog`)**: dorso ganhou **verrugas** escuras (`x`) — textura de pele de sapo (antes o liso uniforme).
+  - **Morcego (`bat`)**: no frame de asa pra cima, a **membrana da asa agora fica ligada ao corpo** (`X` no encontro asa/corpo) em vez de asas soltas nas pontas — asas mais cheias e naturais.
+  - **Fantasmas mais etéreos**: o fantasma genérico dos mortos-vivos (`ghostish`) e o **nightmare** (pesadelo do reino dos sonhos) ganharam uma **aura suave pulsante** na cor da criatura ao redor do corpo (antes só os wraiths de tempestade/vidro tinham). Pulsa com `sin(time*3+id)` e só em `visualLevel()>0` (some no modo econômico) — barato.
+  - Validação: brace-matching do `PXM` + largura consistente dos 17 modelos = NENHUM problema; `node --check` OK. Só render, sem tocar IA/combate/save. sw.js → `arcana-v87`.
+
 - ✅ **v86 — Revisão visual bicho a bicho (3ª leva: humanoides e mortos-vivos)**:
   - **Humanoides (`human`)** — usados por campeões e por alguns inimigos genéricos: adicionado **cinto na cintura com fivela clara** (fileira de `R` escuro = cinto, com `S` no centro = fivela de pele/clara) nos 2 frames de andar. Antes o tronco era um bloco liso.
   - **Túnicas/capuzes (`robe`)** — cultistas, bruxas, guardiões e vários chefes: adicionado **cordão de cintura com fivela/medalhão** (`D` escuro = cinto do manto, com `O` no centro = brilho do medalhão) na linha da cintura.

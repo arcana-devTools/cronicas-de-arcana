@@ -2591,7 +2591,27 @@ function updateLivingWorld(dt){livingWorld.clock=(livingWorld.clock||0)+dt;refre
       shade:{name:'Sombrassapo',hp:46,speed:68,damage:11,r:18,color:'#613c8a',xp:24,level:2},
       wisp:{name:'Fagulha selvagem',hp:34,speed:82,damage:8,r:14,color:'#38bdb0',xp:18,level:1},
       golem:{name:'Golem de Cristal',hp:96,speed:46,damage:16,r:25,color:'#6adbd2',xp:42,level:4},
-      bat:{name:'Morcego do Eclipse',hp:52,speed:105,damage:12,r:15,color:'#71507f',xp:28,level:3},
+      bat:{a:[
+  "..W..........W..",
+  ".WW..........WW.",
+  ".WWXX......XXWW.",
+  "....XhXXXhX.....",
+  "....XXOOOXX.....",
+  "....XXMMMMX.....",
+  ".....X..X.......",
+  "......XX........",
+  ".....X..X.......",
+  "................"],b:[
+  "................",
+  "....XhXXXhX.....",
+  "....XXOOOXX.....",
+  "....XXMMMMX.....",
+  ".W..XXXXXXX..W..",
+  ".WW.XXXXXXXX.WW.",
+  ".WWWX......XWWW.",
+  "......X..X......",
+  ".....X..X.......",
+  "................"]},
       cultist:{name:'Cultista Sombrio',hp:88,speed:64,damage:16,r:20,color:'#842f55',xp:40,level:5},
       prismScorpion:{name:'Escorpião Prismático',hp:124,speed:78,damage:19,r:22,color:'#e7a351',xp:56,level:8},
       glassWraith:{name:'Espectro de Vidro',hp:102,speed:102,damage:18,r:18,color:'#ffca86',xp:50,level:9},
@@ -6761,7 +6781,7 @@ const PXM={
   "...OOO....OOO...",
   "...OoO...OoO....",
   "..XXXXOOOOXXXX..",
-  ".XXXXXXXXXXXXXX.",
+  ".XXxXXXXXXXxXXX.",
   ".XXXXXXXXXXXXXX.",
   "XXXXMMMMMMMMXXXX",
   "XXXXXXXXXXXXXXXX",
@@ -7162,7 +7182,7 @@ const PXM={
     }
     else if(kind==='heroHunter'){pxMobDraw(ctx,e,x,y,'human',{perPx:8,pal:{h:dkB,X:body,x:dkB,R:dkB,A:dkB,S:body,s:dkB,O:'#241725',L:dkB,F:dkB},parts:{back:[{r:'bow',pal:{W:'#f2deb2'}}],front:[{r:'hood',pal:{h:dkB}}]}});}
     else if(kind==='dreamling'){pxMobDraw(ctx,e,x,y,'wisp',{perPx:6,pal:{X:body,x:dkB,C:shadeColor(body,.45)},float:3});}
-    else if(kind==='nightmare'){pxMobDraw(ctx,e,x,y,'ghost',{perPx:7,pal:{X:body,x:dkB,O:'#ffd36b'},float:2});}
+    else if(kind==='nightmare'){if(visualLevel()>0){ctx.globalAlpha=.16+.07*Math.sin(state.time*3.4+e.id);ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(x,y,e.r+10,0,TAU);ctx.fill();ctx.globalAlpha=1;}pxMobDraw(ctx,e,x,y,'ghost',{perPx:7,pal:{X:body,x:dkB,O:'#ffd36b'},float:2});}
     else if(kind==='betrayer'||kind==='nemesis'){pxMobDraw(ctx,e,x,y,'robe',{perPx:7,pal:{X:body,x:dkB,h:dkB,D:'#171223',O:'#ff6e96'},parts:{front:[{r:'staff',pal:{W:dkB,C:'#ff6e96'}}]}});}
     else if(kind==='consciousness'){pxMobDraw(ctx,e,x,y,'wisp',{perPx:7,pal:{X:body,x:dkB,C:shadeColor(body,.5)},float:2});}
     else{pxMobDraw(ctx,e,x,y,'wisp',{perPx:8,pal:{X:body,x:dkB,C:shadeColor(body,.4)},float:2});}
@@ -7212,7 +7232,7 @@ const PXM={
     else if(insect){pxMobDraw(ctx,e,x,y,'beetle',{perPx:7,pal:{X:body,x:shadeColor(body,-.45),D:'#2d2631',O:'#f8e9a5'}});pxMobLegs(ctx,e,x,y,3,dkB);}
     else if(beast){pxMobDraw(ctx,e,x,y,'beast',{perPx:8,pal:{X:body,x:dkB,B:body,e:dkB,O:'#fff4bc',M:'#2a1b22'}});}
     else if(undead){
-      if(ghostish){pxMobDraw(ctx,e,x,y,'ghost',{perPx:8,pal:{X:body,x:dkB,O:'#231020'},float:3});}
+      if(ghostish){if(visualLevel()>0){ctx.globalAlpha=.14+.06*Math.sin(state.time*3+e.id);ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(x,y,e.r+11,0,TAU);ctx.fill();ctx.globalAlpha=1;}pxMobDraw(ctx,e,x,y,'ghost',{perPx:8,pal:{X:body,x:dkB,O:'#231020'},float:3});}
       else if(undeadRobe){pxMobDraw(ctx,e,x,y,'robe',{perPx:8,pal:{X:body,x:dkB,h:dkB,D:'#141018',O:lichish?'#c98cff':'#ff78c8'},parts:{front:[{r:'staff',pal:{W:'#6a4528',C:lichish?'#c98cff':'#ff78c8'}}]}});}
       else if(boneish){pxMobDraw(ctx,e,x,y,'skel',{perPx:8,pal:{h:body,x:dkB,X:body,R:dkB,A:dkB,S:dkB,O:'#22202a',T:'#efe6d0',s:dkB,L:dkB,F:dkB}});}
       else{pxMobDraw(ctx,e,x,y,'human',{perPx:8,pal:{h:dkB,X:body,x:dkB,R:dkB,A:dkB,S:shadeColor(body,.18),s:dkB,O:'#3a2a1a',L:dkB,F:dkB}});}
