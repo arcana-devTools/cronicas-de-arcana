@@ -220,6 +220,10 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
+- ✅ **v90 — Tela de login de volta na abertura (Convidado / Google / Entrar ou criar conta)**:
+  - Problema: a função `showLogin()` existia mas **nunca era chamada** — o botão "Jogar" da tela inicial chamava direto `showMenu()` (entrava como convidado), e não havia nenhum botão na abertura que levasse à tela de login. Resultado: a tela com Entrar/Criar conta, "Jogar como convidado" e "Entrar com Google" ficou inacessível.
+  - Correção: na tela inicial (`splashScreen`), abaixo do botão "Jogar", adicionados 2 botões: **"Entrar com Google"** (`splashAccountBtn`, abre a tela de login e já dispara `doSocialLogin('google')`) e **"🔑 Entrar ou criar conta"** (`splashLoginBtn`, abre a tela de login `showLogin()` com a aba Entrar). CSS próprio (`.splash-login-row/.splash-account-btn/.splash-login-btn`) no estilo do jogo; o "Jogar" continua entrando direto como convidado (atalho rápido). Listeners adicionados junto aos demais da abertura. `node --check` OK; não toca em save. sw.js → `arcana-v90`.
+
 - ✅ **v89 — Lobo/fera de 4 patas redesenhado em perfil (parece lobo de verdade)**:
   - Problema: o modelo `beast` (lobo do gelo, javali/perseguidor da areia e todos os cães/lobos) era um "tijolinho" mole, sem orelhas, focinho nem rabo — não parecia lobo.
   - Redesenhei a grade do `beast` (9×16, 2 frames de andar) num **perfil de lobo** claro: **orelhas pontudas** no alto da cabeça (`e`/`B`), **focinho comprido com nariz escuro** na ponta (`M`/`x`), olho (`O`), corpo alongado com ventre `x` e **4 patas** (`L` perna + `F` pata), mais o rabo vetorial que já existe (`drawEnemyMotionDetails`, curva). Cabeça à esquerda na grade; o motor espelha o `beast` para acompanhar a direção do movimento (como já fazia). Letras usadas (`e/B/M/x/O/L/F`) cobertas pelas paletas das feras + fallback de cores (v84). Largura de 16 colunas validada nos 2 frames; `node --check` OK. Só render, sem tocar IA/combate/save. sw.js → `arcana-v89`.
