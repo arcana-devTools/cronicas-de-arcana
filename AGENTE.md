@@ -220,6 +220,12 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
+- ✅ **v86 — Revisão visual bicho a bicho (3ª leva: humanoides e mortos-vivos)**:
+  - **Humanoides (`human`)** — usados por campeões e por alguns inimigos genéricos: adicionado **cinto na cintura com fivela clara** (fileira de `R` escuro = cinto, com `S` no centro = fivela de pele/clara) nos 2 frames de andar. Antes o tronco era um bloco liso.
+  - **Túnicas/capuzes (`robe`)** — cultistas, bruxas, guardiões e vários chefes: adicionado **cordão de cintura com fivela/medalhão** (`D` escuro = cinto do manto, com `O` no centro = brilho do medalhão) na linha da cintura.
+  - **Esqueleto (`skel`)**: adicionada **coluna de osso** clara (`T`, mesmo tom dos dentes) descendo o centro do tórax até a pelve, nos 2 frames — além das costelas que já existiam, agora dá pra ler a espinha.
+  - Todas as letras usadas (`R/S/A/L/F/x/X`, `D/O/h`, `T/A/x`) já existem nas paletas desses modelos (confirmado por grep das chamadas `pxMobDraw`), então não há furos. Validação: brace-matching do objeto `PXM` + largura consistente dos 17 modelos (`human,skel,soldier,robe,blob,frog,wisp,ghost,bat,beast,spider,beetle,dragon,serpent,cons,dia,head3`) = NENHUM problema; `node --check` OK. Só render, sem tocar IA/combate/save. sw.js → `arcana-v86`.
+
 - ✅ **v85 — Revisão visual bicho a bicho (2ª leva: serpente, aranha, golem)**:
   - **Serpente/cobra (`serpent`)**: corpo ganhou **escamas em xadrez** (textura `t`, mesmo padrão do dragão) ao longo do corpo e da cauda — antes era um tubo liso. Largura de 20 colunas preservada nos 7 rows.
   - **Aranha (`spider`)**: abdômen ganhou **marcação losangular** (cor mais escura `x` + faixa clara `M`) no centro e os olhos (`O`) ficaram mais definidos no cefalotórax — antes era um ovo liso com 2 olhos. Usa só letras presentes na paleta (`X/x/O/M`; `M` cai no fallback de sombra).
