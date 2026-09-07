@@ -1,5 +1,5 @@
 // Service Worker — Crônicas de Arcana (offline-first)
-const CACHE = 'arcana-v87';
+const CACHE = 'arcana-v88';
 const SHELL = [
   './',
   './index.html',

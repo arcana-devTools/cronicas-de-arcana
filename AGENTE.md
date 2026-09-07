@@ -220,6 +220,11 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
+- ✅ **v88 — Personagem agora VIRA para o movimento/ataque/defesa (celular)**:
+  - Causa: no celular `pointer.active` é sempre `false` (toque), então `playerFacingVector()` caía direto na direção do **corpo** (`player.dirX/dirY`) e ignorava o analógico de ataque e o alvo travado. Resultado: o escudo virava (ele usava `guardFacingVector`, da v81), mas o **corpo** não virava na direção do ataque/defesa — dava a impressão de o boneco atacar/defender "de lado".
+  - Correção: nova função **`bodyFacingVector()`** com prioridade: (1) defendendo (`guardActive`/`manaShield`) → usa `guardFacingVector()` (corpo acompanha o escudo/mira); (2) cursor ativo (PC) → mira do cursor; (3) atacando/conjurando (`attackAnim`/`castAnim`) OU com o analógico de ataque arrastado (`attackJoystick` além de .15) → usa `getAim()` (analógico de ataque > cursor > alvo travado mobile > corpo); (4) senão (andando/parado) → direção do movimento. As 4 chamadas de desenho do personagem (`drawPlayer` 6095, forma druida 4938, forma secreta 6141, forma da morte 6227) agora usam `bodyFacingVector()` em vez de `playerFacingVector()` (a antiga ficou definida mas sem uso, preservada por segurança).
+  - Efeito: andando → vira pro movimento; atacando/defendendo/mirando pelo analógico direito → vira pra mira/alvo. `node --check` OK; sem mudança de save/IA/combate. sw.js → `arcana-v88`.
+
 - ✅ **v87 — Revisão visual bicho a bicho (4ª leva: sapo, morcego e fantasmas)**:
   - **Sapo (`frog`)**: dorso ganhou **verrugas** escuras (`x`) — textura de pele de sapo (antes o liso uniforme).
   - **Morcego (`bat`)**: no frame de asa pra cima, a **membrana da asa agora fica ligada ao corpo** (`X` no encontro asa/corpo) em vez de asas soltas nas pontas — asas mais cheias e naturais.
