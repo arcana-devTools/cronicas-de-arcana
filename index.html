@@ -6562,28 +6562,36 @@ function mobRenderCv(rows,s,flip,basePal,parts){
   let minX=-bw/2,maxX=bw/2,minY=-bh/2,maxY=bh/2;
   for(const q of quads){minX=Math.min(minX,q.ox-q.pw/2);maxX=Math.max(maxX,q.ox+q.pw/2);minY=Math.min(minY,q.oy-q.ph/2);maxY=Math.max(maxY,q.oy+q.ph/2);}
   const W=Math.max(1,Math.ceil(maxX-minX)),H=Math.max(1,Math.ceil(maxY-minY));
-  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
-  // v79b: correcao definitiva de recorte dos mobs — ancora em ax=-minX, ay=-minY
-  // (antes era W/2-minX, que deslocava o corpo em meia largura e cortava 75% dos monstros)
-  const g=cv.getContext('2d'),ax=-minX,ay=-minY;
-  for(const q of quads)if(q.grp==='back')pxMobRows(g,ax+q.ox,ay+q.oy,s,q.rows,q.pal,flip);
-  pxMobRows(g,ax,ay,s,rows,basePal,flip);
-  for(const q of quads)if(q.grp==='front')pxMobRows(g,ax+q.ox,ay+q.oy,s,q.rows,q.pal,flip);
-  // v83: volume "assado" no sprite cacheado — luz suave no alto, sombra na base, brilho no topo.
-  // Como o cv é renderizado 1x e reaproveitado, isto NÃO custa nada por frame (mobile-friendly).
-  g.globalCompositeOperation='source-atop';
-  const vg=g.createLinearGradient(0,0,0,H);
+  const pad=Math.max(1,Math.round(s*0.6)); // v84: espessura do contorno (escala com o tamanho)
+  const FW=W+pad*2,FH=H+pad*2;
+  // 1) renderiza o sprite colorido num canvas temporário
+  const tmp=document.createElement('canvas');tmp.width=W;tmp.height=H;
+  const tg=tmp.getContext('2d'),ax=-minX,ay=-minY;
+  for(const q of quads)if(q.grp==='back')pxMobRows(tg,ax+q.ox,ay+q.oy,s,q.rows,q.pal,flip);
+  pxMobRows(tg,ax,ay,s,rows,basePal,flip);
+  for(const q of quads)if(q.grp==='front')pxMobRows(tg,ax+q.ox,ay+q.oy,s,q.rows,q.pal,flip);
+  // v83: volume "assado" — luz suave no alto, sombra na base, brilho no topo. Aplicado no tmp (1x, cacheado).
+  tg.globalCompositeOperation='source-atop';
+  const vg=tg.createLinearGradient(0,0,0,H);
   vg.addColorStop(0,'rgba(255,255,240,0.20)');
   vg.addColorStop(0.32,'rgba(255,255,255,0.06)');
   vg.addColorStop(0.68,'rgba(20,12,40,0.06)');
   vg.addColorStop(1,'rgba(10,6,24,0.30)');
-  g.fillStyle=vg;g.fillRect(0,0,W,H);
-  // luz direcional vinda de cima-esquerda: brilho suave no canto superior
-  const lg=g.createRadialGradient(W*0.34,H*0.18,1,W*0.34,H*0.18,Math.max(W,H)*0.75);
+  tg.fillStyle=vg;tg.fillRect(0,0,W,H);
+  const lg=tg.createRadialGradient(W*0.34,H*0.18,1,W*0.34,H*0.18,Math.max(W,H)*0.75);
   lg.addColorStop(0,'rgba(255,255,235,0.16)');
   lg.addColorStop(1,'rgba(255,255,235,0)');
-  g.fillStyle=lg;g.fillRect(0,0,W,H);
-  g.globalCompositeOperation='source-over';
+  tg.fillStyle=lg;tg.fillRect(0,0,W,H);
+  tg.globalCompositeOperation='source-over';
+  // 2) silhueta escura do sprite (source-in tinge tudo que é opaco) — vira o contorno
+  const sil=document.createElement('canvas');sil.width=W;sil.height=H;
+  const sg=sil.getContext('2d');sg.drawImage(tmp,0,0);
+  sg.globalCompositeOperation='source-in';sg.fillStyle='#140d20';sg.fillRect(0,0,W,H);sg.globalCompositeOperation='source-over';
+  // 3) canvas final: contorno escuro deslocado ao redor + sprite colorido por cima
+  const cv=document.createElement('canvas');cv.width=FW;cv.height=FH;
+  const g=cv.getContext('2d');
+  for(const [ox,oy] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]])g.drawImage(sil,pad+ox*pad,pad+oy*pad);
+  g.drawImage(tmp,pad,pad);
   return cv;
 }
 function pxMobDraw(g,e,cx,cy,arch,o){
@@ -6601,6 +6609,16 @@ function pxMobDraw(g,e,cx,cy,arch,o){
   if(o.float!=null)bob+=Math.round(Math.sin(state.time*2.4+(e.id||0))*o.float);
   else if(o.flap==null&&e.moving)bob=Math.floor((e.walkCycle||0)/1.5)%2?-s:0;
   const pal=o.pal||{};
+  // v84: fallback de cores — se faltar alguma letra na paleta (ex.: pernas 'L'/'F' das feras,
+  // que vinham invisíveis), derivamos automaticamente da cor do corpo. Nunca piora nada.
+  if(!pal.__fb){
+    const body=pal.X||pal.B||pal.t||pal.h||pal.C||pal.D||pal.H||'#9a6fae';
+    const want={x:-.32,L:-.42,F:-.6,A:-.12,s:-.15,e:-.2,t:-.3,R:-.4,D:-.45,h:-.34,W:-.1,k:-.55,G:-.2};
+    for(const k in want){if(pal[k]==null){try{pal[k]=shadeColor(body,want[k]);}catch(_){}}}
+    if(pal.O==null)pal.O='#fff6cf';
+    if(pal.M==null)pal.M=shadeColor(body,-.6);
+    pal.__fb=1;
+  }
   const key=mobCvKey(arch,fi,s,flip,pal,o.parts);
   let cv=MOBCV.get(key);
   if(!cv){cv=mobRenderCv(frame,s,flip,pal,o.parts);if(MOBCV.size>420)MOBCV.clear();MOBCV.set(key,cv);}
@@ -6729,14 +6747,14 @@ const PXM={
   "................",
   "......xxxx......",
   "....xXXXXXXx....",
-  "...XXXXXXXXXX...",
+  "...XXXXOXXXXX...",
   "...XOOXXXXOOX...",
-  "..XXXXXXXXXXXX..",
+  "..XXOXXXXXXOXX..",
   "..XXXMMMMMXXX...",
   "..XXXXXXXXXXXX..",
   ".XXXxXXXXxXXX...",
   "..xXXXXXXXXx....",
-  "...xxxxxx......."]},
+  "...xxxxxx......."],},
   // ── sapo-ruxo (Sombrassapo) ──
   frog:{a:[
   "...OO......OO...",
@@ -6811,19 +6829,19 @@ const PXM={
   beast:{a:[
   "......ee........",
   ".....eBBBB......",
-  "....BBBBBBBB....",
-  "....BOBBBBBBBB..",
-  "....BBMMMMBBBB..",
-  "..BBBBBBBBBBBBBx",
+  "....BeBBeBB.....",
+  "....BOBBBeBBB...",
+  "....BBMMMMBBB...",
+  "..BBBeBBBeBBBBx.",
   "..xBBBBBBBBBBBBx",
   ".LL..LL..LL..LL.",
   ".F...F...F...F.."],b:[
   "......ee........",
   ".....eBBBB......",
-  "....BBBBBBBB....",
-  "....BOBBBBBBBB..",
-  "....BBMMMMBBBB..",
-  "..BBBBBBBBBBBBBx",
+  "....BeBBeBB.....",
+  "....BOBBBeBBB...",
+  "....BBMMMMBBB...",
+  "..BBBeBBBeBBBBx.",
   "..xBBBBBBBBBBBBx",
   "..LL..LL..LL..LL",
   "..F...F...F...F."]},
@@ -6840,34 +6858,34 @@ const PXM={
   // ── besouro/vespão (corpo; pernas via pxMobLegs) ──
   beetle:{a:[
   "......xXXXx.....",
-  ".....XXXXXXXX...",
-  "...DOOXXXXXXXx..",
-  "...DOOXXXXXXXx..",
-  ".....XXXXXXXX...",
-  ".....XXXXXXXX...",
-  "......xXXXx....."]},
+  ".....XOXXXXX....",
+  "...DOOXXXOXDXX..",
+  "...DOOXXOXDXXX..",
+  ".....XOXXXXXX...",
+  ".....XXXOXXXX...",
+  "......xXXXx....."],},
   // ── dragão (2 frames de asa; cabeça à direita, cauda à esquerda) ──
   dragon:{a:[
   ".WW...........WW....",
   "WWW...........WWW...",
   "WWWX.........XWWW...",
-  "..tXXXXXXXXXX...BB..",
-  ".t..XXXXXXXXX..BBB..",
-  "XXXXXXXXXXXXXBBOBB..",
-  ".XXXXXXXXXXXXBBB....",
-  "..XXXXXXXXXXXX......",
-  "...XXXXXXXXXX.......",
+  "..tXtXXtXXtXX...BB..",
+  ".t..XXtXXtXXX..BBB..",
+  "XXtXXtXXtXXtXBBOBB..",
+  ".WXXtXXtXXtXXBBB....",
+  "..XXtXXtXXtXXX......",
+  "...XXXXtXXXtX.......",
   "...XX..XX..XX......."],b:[
   "....................",
-  "..tXXXXXXXXXX...BB..",
-  ".t..XXXXXXXXX..BBB..",
-  "XXXXXXXXXXXXXBBOBB..",
-  ".W..XXXXXXXXX.BB..W.",
-  "WW..XXXXXXXX..BB.WW.",
-  "WWW.XXXXXXX..BB.WWW.",
-  "..XXXXXXXXXXXX......",
-  "...XXXXXXXXXX.......",
-  "...XX..XX..XX......."]},
+  "..tXtXXtXXtXX...BB..",
+  ".t..XXtXXtXXX..BBB..",
+  "XXtXXtXXtXXtXBBOBB..",
+  ".WXXtXXtXXtXXBBB....",
+  ".W..XXtXXtXXX.BB..W.",
+  "WW..XXXXtXXX..BB.WW.",
+  "WWW.XXXXtXX..BB.WWW.",
+  "..XXtXXtXXXXXX......",
+  "...XXXXXXXXXX......."]},
   // ── serpente (sem asas) ──
   serpent:{a:[
   "..............BBBB..",

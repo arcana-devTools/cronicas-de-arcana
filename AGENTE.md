@@ -220,6 +220,16 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
+- ✅ **v84 — Revisão visual bicho a bicho (modelos de sprite)**:
+  - **Contorno escuro em TODOS os monstros** (`mobRenderCv`): o sprite agora é desenhado num canvas um pouco maior; uma silhueta preta-arroxeada (`#140d20`) é gerada com `source-in` a partir da forma e desenhada deslocada em 8 direções atrás do corpo (espessura `pad=max(1,round(s*0.6))`, escala com o tamanho), com o colorido por cima. Resultado: cada bicho "salta" do fundo e fica legível — marca registrada do estilo Curse of Aros. É feito 1x no cache (`MOBCV`), **zero custo por frame**. Também adiciona `pad` às margens do canvas pra não cortar o contorno (centralização `cv.width/2` continua correta).
+  - **BUG corrigido: pernas das feras invisíveis.** O modelo `beast` (lobo, javali, cão, etc.) tem pernas na grade nas letras `L`/`F`, mas nenhuma das 3 chamadas definia essas cores → as perninhas não pintavam (o bicho parecia flutuar). Adicionado **fallback automático de paleta** no `pxMobDraw`: se faltar uma letra (x/L/F/A/s/e/t/R/D/h/W/k), ela é derivada da cor do corpo via `shadeColor` (perna/pata mais escura), com `O` padrão branco-olho e `M` padrão sombra. Não altera quem já define as cores; só preenche as que faltam.
+  - **Textura por modelo** (grades enriquecidas, largura de linha preservada e validada):
+    - `beast` (fera 4 patas): pelagem mais escura no dorso (manchas `e`) + agora as 4 pernas aparecem (correção acima).
+    - `dragon` (dragão/hidra): escamas no corpo (textura `t` em xadrez) e um brilho `W` no lombo, nos 2 frames de asa.
+    - `beetle` (besouro/escorpião): carapaça com brilho `O` e divisão central das asas.
+    - `blob` (gosma): dois pontinhos de brilho no topo (aspecto molhado/grudento).
+  - Validação: script confere largura consistente de todas as linhas dos 16 modelos (`human,skel,soldier,robe,blob,frog,wisp,ghost,bat,beast,spider,beetle,dragon,serpent,cons,dia,head3`) — todos OK. `node --check` OK. Mudanças só de render (mesmas cores-base, formas-base intactas). Marcadores: `silhueta escura do sprite`, `fallback de cores`. Save 100% compatível. sw.js → `arcana-v84`.
+
 - ✅ **v83 — Monstros mais bonitos e com volume (estilo Curse of Aros)**:
   - **Volume "assado" no sprite cacheado** (`mobRenderCv`): depois de pintar o sprite pixel, adicionei um degradê de luz/sombra com `globalCompositeOperation='source-atop'` — topo mais claro (luz), base mais escura (sombra) + um brilho radial suave vindo de cima-esquerda. Isso dá aparência 3D/redonda a **todos os ~102 monstros de uma vez**. Como o canvas do sprite é renderizado 1x e reaproveitado do cache (`MOBCV`), **custa zero por frame** (mobile-friendly). Não muda cores-base nem formato; só adiciona luz/sombra por cima.
   - **Reflexo de cor no chão** sob cada monstro (`drawEnemy`, logo após a sombra): uma elipse tênue na cor da criatura que pulsa levemente — a luz "vaza" no piso e dá presença/profundidade. Só em `visualLevel()===2` (qualidade alta).
