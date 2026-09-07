@@ -220,6 +220,12 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
+- ✅ **v85 — Revisão visual bicho a bicho (2ª leva: serpente, aranha, golem)**:
+  - **Serpente/cobra (`serpent`)**: corpo ganhou **escamas em xadrez** (textura `t`, mesmo padrão do dragão) ao longo do corpo e da cauda — antes era um tubo liso. Largura de 20 colunas preservada nos 7 rows.
+  - **Aranha (`spider`)**: abdômen ganhou **marcação losangular** (cor mais escura `x` + faixa clara `M`) no centro e os olhos (`O`) ficaram mais definidos no cefalotórax — antes era um ovo liso com 2 olhos. Usa só letras presentes na paleta (`X/x/O/M`; `M` cai no fallback de sombra).
+  - **Construto/golem de pedra (`cons`)**: corpo ganhou **rachaduras de pedra** (`R` escuro) nos ombros, tórax e pernas, nos 2 frames de andar — realça que é feito de rocha. Cristal no peito e olhos mantidos.
+  - Validação: parser por profundidade de chaves confere largura consistente de todos os 17 modelos (`human,skel,soldier,robe,blob,frog,wisp,ghost,bat,beast,spider,beetle,dragon,serpent,cons,dia,head3`) — NENHUM problema; `node --check` OK. Corrigido um deslize de edição onde o rótulo `beetle:{a:[` foi temporariamente sobrescrito (reparado na mesma leva). Tudo é só render (formas-base intactas, sem tocar IA/combate/save). sw.js → `arcana-v85`.
+
 - ✅ **v84 — Revisão visual bicho a bicho (modelos de sprite)**:
   - **Contorno escuro em TODOS os monstros** (`mobRenderCv`): o sprite agora é desenhado num canvas um pouco maior; uma silhueta preta-arroxeada (`#140d20`) é gerada com `source-in` a partir da forma e desenhada deslocada em 8 direções atrás do corpo (espessura `pad=max(1,round(s*0.6))`, escala com o tamanho), com o colorido por cima. Resultado: cada bicho "salta" do fundo e fica legível — marca registrada do estilo Curse of Aros. É feito 1x no cache (`MOBCV`), **zero custo por frame**. Também adiciona `pad` às margens do canvas pra não cortar o contorno (centralização `cv.width/2` continua correta).
   - **BUG corrigido: pernas das feras invisíveis.** O modelo `beast` (lobo, javali, cão, etc.) tem pernas na grade nas letras `L`/`F`, mas nenhuma das 3 chamadas definia essas cores → as perninhas não pintavam (o bicho parecia flutuar). Adicionado **fallback automático de paleta** no `pxMobDraw`: se faltar uma letra (x/L/F/A/s/e/t/R/D/h/W/k), ela é derivada da cor do corpo via `shadeColor` (perna/pata mais escura), com `O` padrão branco-olho e `M` padrão sombra. Não altera quem já define as cores; só preenche as que faltam.
