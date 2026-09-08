@@ -2787,7 +2787,17 @@ function updateLivingWorld(dt){livingWorld.clock=(livingWorld.clock||0)+dt;refre
     try{
       // arquivo local (file://) não tem origem válida para OAuth: usa o site publicado.
       if(location.origin==='null'||location.origin==='file://'||location.protocol==='file:')
-        base='https://jazzy-llama-2190b3.netlify.app';
+        base='https://arcana-devtools.github.io/cronicas-de-arcana';
+      else{
+        // v91: inclui a SUBPASTA onde o jogo está (GitHub Pages serve em /cronicas-de-arcana/).
+        // Antes usava só location.origin, e o Google redirecionava para a raiz da conta
+        // (que dá 404), em vez de voltar para o jogo.
+        let p=location.pathname||'/';
+        p=p.replace(/\/[^\/]*\.(html?|php)$/,'/'); // remove arquivo final (ex.: /index.html)
+        if(!p.endsWith('/'))p+='/';
+        p=p.replace(/\/+$/,'');                     // remove barra(s) final(is)
+        base=location.origin+(p||'');
+      }
     }catch(e){}
     return _sb.auth.signInWithOAuth({provider,options:{redirectTo:base+'/',queryParams:{prompt:'select_account'}}});
   }
