@@ -2036,6 +2036,7 @@ function updateLivingWorld(dt){livingWorld.clock=(livingWorld.clock||0)+dt;refre
   function tutorialHint(){
     const ctrl=tutorialCtrl(),touch=ctrl.touch,key=a=>touch?null:keyLabel(bindings[a]);
     const map={
+      0:{text:ctrl.move,detail:'vá até a Mentora Aurora (marcador "!") e, chegando perto dela, '+ctrl.interact,keys:touch?null:['up','left','right','down']},
       1:{text:ctrl.moveUp,detail:'o herói anda na direção que você aponta',keys:touch?null:['up']},
       2:{text:ctrl.moveDown,detail:'volte pelo caminho que veio',keys:touch?null:['down']},
       3:{text:ctrl.moveSides,detail:'lados completam o movimento',keys:touch?null:['left','right']},
@@ -2746,10 +2747,16 @@ function updateLivingWorld(dt){livingWorld.clock=(livingWorld.clock||0)+dt;refre
     Object.assign(skills,{power:0,focus:0,spirit:0});Object.assign(classEvolution.druid,{selected:'wolf',notified:['wolf']});Object.assign(classEvolution.bard,{possessions:0,longest:0,controlNotified:false});classMastery.choices={};classMastery.notified=[];Object.assign(equipmentBuildState,{enchants:0,setPiecesFound:[],artifactsFound:[]});Object.assign(livingWorld,{clock:0,day:0,contracts:[],activeId:null,completed:0,regionalEcho:{},lastPeriod:'',choice:null});cityNPCs.forEach(n=>{if(n.homeX!=null){n.x=n.homeX;n.y=n.homeY;}n.routineMoving=false;});Object.assign(dungeonState,{active:false,id:null,seed:0,elapsed:0,rooms:[],walls:[],runes:[],sequence:[],sequenceStep:0,puzzleSolved:false,traps:[],trapCd:0,keys:0,keysRequired:1,chamberEngaged:false,minibossId:null,bossId:null,chest:{x:0,y:0,opened:false},secretPassages:[],completions:{whisper:0,prism:0,astral:0},bestTimes:{}});Object.assign(combatState,{combo:0,comboTimer:0,finisher:false,lastRegisteredSerial:0,perfectDodges:0,bossesStaggered:0,guardActive:false,guardWindow:0,guardAngle:0,guardBreak:0,guardBlocks:0,guardReflects:0,manaShield:false,manaBreak:0,manaShieldFlash:0});Object.keys(materials).forEach(k=>materials[k]=0);for(const p of Object.values(professions))Object.assign(p,{level:1,xp:0,next:p.name==='Mineração'||p.name==='Herbalismo'||p.name==='Pesca'?30:35});Object.assign(progressStats,{kills:0,deaths:0,crafts:0,gathers:0,bossKills:0,sanctumKills:0,legendaryKills:[],maxCrystals:0,coinsEarned:0,fishCaught:0,legendaryFish:0,itemsSold:0,arenaWins:0,secretPassages:0,alcoveLooted:0,merchantBuys:0,petsCaptured:0,visitedRegions:['Vale de Lumina']});fishPouch={};Object.assign(arenaState,{wins:0,streak:0,bestStreak:0});travelingMerchant.active=false;player.arcaneLens=false;Object.keys(bestiaryKills).forEach(k=>delete bestiaryKills[k]);resetHousingState();resetBeyondState();Object.assign(worldProgress,{quest:0,bosses:{glassTitan:0,mireHydra:0,stormDragon:0,voidDevourer:0},chests:{glass:false,swamp:false,storm:false,void:false},eventsWon:0});Object.assign(reputation,{lumina:0,auralis:0,horizons:0,umbral:0});Object.assign(storyProgress,{stage:0,path:null,fate:null,targetKills:0,ending:null,choices:[],bonusGranted:false});Object.assign(secretProgress,{stage:accountSecrets.unlockedClasses.includes(classId)?5:0,puzzle:0,kills:0,guardianDefeated:false});worldEvent={active:false,id:null,kills:0,target:0,time:0,cooldown:75,title:'',region:'',x:0,y:0};unlockedAchievements=[];ownedPets=[];activePet=null;petCollection={};capturableSpawns=[];petPetCd=0;Object.assign(deathForm,{unlocked:false,active:false,xp:0,stage:0,path:null,mark:null,markT:0,stolen:[],fused:null,mutation:null,choicePending:false,shiftAnim:0});Object.assign(mobAbilityState,{unlocked:[],equipped:[],cds:[0,0,0]});Object.assign(reincForms,{unlocked:[],active:null,xp:{slime:0,spider:0,goblin:0},stage:{slime:0,spider:0,goblin:0},cds:[0,0,0,0],mark:null,markT:0});pendingReincarnation=null;respawnPoint.x=null;respawnPoint.y=null;respawnPoint.label=null;resourceNodes.forEach(n=>{n.active=true;n.timer=0;});runes.forEach(r=>r.active=false);Object.assign(bankState,{capital:600,lastDay:0,investments:[],loan:null,investmentsClaimed:0,lifetimeInterest:0,history:[],marketIndex:1,lastIndex:1});nextBankInvestId=1;resetPlayer(classId);resetGear();resetEnemies();setupClassCompanions();setupGuards();projectiles=[];particles=[];impactRings=[];dashTrails=[];zones=[];footprints=[];bossTelegraphs=[];debris=[];slashTrails=[];coinDrops=[];
     state.started=true; state.paused=false; ui.start.classList.add('hidden'); ui.creator.classList.add('hidden'); ui.end.classList.add('hidden');
     initAudio(); blip(330,.08,'sine',.035);
-    setDialogue('Mentora Aurora',[
-      `${appearance.name}... a Ilha do Alvorecer sentiu sua chegada.`,
-      'Aproxime-se de mim e pressione E para começar o treinamento.',
-      'O painel dourado mostrará cada passo — aperte as teclas e faça na prática!'
+    // v92: o novo herói nasce a uma distância da Mentora Aurora, para que o tutorial
+    // ensine na PRÁTICA a ANDAR até ela (WASD/setas ou joystick) e apertar E para falar.
+    const aur=tutorialNPC('aurora');
+    if(aur){player.x=aur.x-40;player.y=aur.y+300;} // um pouco ao sul da Aurora (andar para CIMA até ela)
+    if(respawnPoint.x==null){respawnPoint.x=player.x;respawnPoint.y=player.y;}
+    // Guia de boas-vindas (não é a fala da Aurora): explica que é preciso ANDAR até ela e apertar E.
+    setDialogue('Guia da Ilha',[
+      `${appearance.name}, a Ilha do Alvorecer vai te ensinar a jogar na prática.`,
+      `🚶 A Mentora Aurora está mais ao norte, com um "!" dourado. Use ${tutorialCtrl().move} para andar até ela.`,
+      `✋ Quando chegar bem perto dela, aperte ${tutorialCtrl().interact} para falar e começar o treinamento.`
     ]);
     saveGame();
   }

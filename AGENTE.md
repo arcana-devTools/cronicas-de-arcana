@@ -220,6 +220,14 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
+- ✅ **v92 — Tutorial do início: forçado a ANDAR até a Mentora Aurora e apertar E**:
+  - **Problema**: no jogo novo o herói nascia quase colado na Mentora Aurora (a ~1 palmo) e o jogo já abria um **diálogo automático dela** — o primeiro contato parecia automático e quase não exigia andar nem apertar E (não ensinava a interagir de verdade).
+  - **Mudança** (só afeta jogo NOVO; saves de quem já passou/está no tutorial não mudam — compatível):
+    1. **Ponto de nascimento** do novo herói movido para ~300px ao SUL da Aurora (`const aur=tutorialNPC('aurora'); player.x=aur.x-40; player.y=aur.y+300;`), dentro de `newGame()` DEPOIS de `resetPlayer()`. Assim é preciso usar WASD/setas/joystick para ANDAR (para CIMA) até ela.
+    2. **Diálogo automático dela removido**: trocado por um guia neutro ("Guia da Ilha") que explica em PT "ande até a Mentora Aurora (marcador '!') e aperte E quando chegar perto". A fala de boas-vindas + avanço do tutorial (0→1) agora SÓ acontecem quando o jogador aperta **E perto da Aurora** (fluxo já existente em `interact()`/`handleTutorialNPC`).
+    3. **Dica dourada da etapa 0 adicionada** em `tutorialHint()` (`0:{text:ctrl.move, detail:'vá até a Mentora Aurora ... e aperte E', keys:[up,left,right,down]}`) — antes a etapa 0 não tinha dica; agora mostra as teclas WASD na tela e orienta a andar + apertar E.
+  - Avanço 0→1 continua via `interact()` (exige E a <88px da Aurora). `node --check` OK. sw.js → `arcana-v92`.
+
 - ✅ **v91 — Login Google volta para o jogo + conta GitHub renomeada (arcana-devtools)**:
   - **Conta GitHub renomeada** para o login neutro **`arcana-devTools`** (nome de exibição "arcana-dev"). Endereço do jogo agora é `https://arcana-devtools.github.io/cronicas-de-arcana/` (HTTP 200, Pages ativo, v90 servindo). O endereço antigo `ronaldogg120956-rgb.github.io/...` dá 404 (GitHub Pages não mantém redirect de subdomínio após renomear a conta) — usar sempre o novo. Remote do git atualizado para `arcana-devTools/cronicas-de-arcana` (token PAT funciona, `ls-remote` ok).
   - **Correção do OAuth (Google)**: `sbOAuth` usava `redirectTo = location.origin + '/'`, mas o jogo está servido na **subpasta** `/cronicas-de-arcana/`; o Google redirecionava para a **raiz da conta** (`arcana-devtools.github.io/`), que dá 404 ("There isn't a GitHub Pages site here"). Agora `redirectTo` inclui a subpasta (remove o nome de arquivo final e garante barra final): `location.origin + pathname(sem arquivo)/`. Fallback de `file://` atualizado do endereço antigo da Netlify para o site novo.
