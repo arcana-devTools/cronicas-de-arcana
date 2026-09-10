@@ -2035,8 +2035,17 @@ function updateLivingWorld(dt){livingWorld.clock=(livingWorld.clock||0)+dt;refre
   // Dica da etapa: o que usar e o que o comando faz (estilo Kakele).
   function tutorialHint(){
     const ctrl=tutorialCtrl(),touch=ctrl.touch,key=a=>touch?null:keyLabel(bindings[a]);
+    // v92.1 etapa 0: pede W para ANDAR até a Mentora Aurora; quando chega perto dela, passa a pedir E.
+    let step0=null;
+    if(state.tutorial===0){
+      const aur=tutorialNPC('aurora');
+      const near=!!aur&&Math.hypot(player.x-aur.x,player.y-aur.y)<175;
+      step0=near
+        ?{text:ctrl.interact,detail:'você chegou! Aperte para falar com a Mentora Aurora e começar',keys:touch?null:['interact']}
+        :{text:ctrl.moveUp,detail:'a Mentora Aurora está ao norte (marcador "!") — segure para andar até ela',keys:touch?null:['up']};
+    }
     const map={
-      0:{text:ctrl.move,detail:'vá até a Mentora Aurora (marcador "!") e, chegando perto dela, '+ctrl.interact,keys:touch?null:['up','left','right','down']},
+      0:step0,
       1:{text:ctrl.moveUp,detail:'o herói anda na direção que você aponta',keys:touch?null:['up']},
       2:{text:ctrl.moveDown,detail:'volte pelo caminho que veio',keys:touch?null:['down']},
       3:{text:ctrl.moveSides,detail:'lados completam o movimento',keys:touch?null:['left','right']},
@@ -2117,7 +2126,9 @@ function updateLivingWorld(dt){livingWorld.clock=(livingWorld.clock||0)+dt;refre
     }
     tutorialShieldHintCd=Math.max(0,tutorialShieldHintCd-dt);
   }
-  function tutorialTaskText(){const map=['Fale com a Mentora Aurora','Ande para CIMA','Ande para BAIXO','Ande para a ESQUERDA e DIREITA','Golpeie o Boneco de Madeira','Golpeie o boneco 3 vezes no total','Fale com o Treinador Orso','Use habilidades 3 vezes','Esquive-se com dash 1 vez','Cure-se 1 vez','Fale com a Mercadora Lia','Equipe a arma de treino','Interaja com o Espantalho de Treino',shieldClassIds.has(state.classId)?'Bloqueie o projétil com o escudo':'Fale com a Mercadora Lia','Fale com a Mercadora Lia','Venda 1 item no mercado (role a lista até o botão Vender)','Fale com o Capitão Ulric no barco'];return map[Math.min(16,Math.max(0,state.tutorial))]||'Tutorial concluído';}
+  function tutorialTaskText(){
+    if(state.tutorial===0){const a=tutorialNPC('aurora');return (a&&Math.hypot(player.x-a.x,player.y-a.y)<175)?'Aperte E para falar com a Mentora Aurora':'Ande até a Mentora Aurora (segure W)';}
+    const map=['Fale com a Mentora Aurora','Ande para CIMA','Ande para BAIXO','Ande para a ESQUERDA e DIREITA','Golpeie o Boneco de Madeira','Golpeie o boneco 3 vezes no total','Fale com o Treinador Orso','Use habilidades 3 vezes','Esquive-se com dash 1 vez','Cure-se 1 vez','Fale com a Mercadora Lia','Equipe a arma de treino','Interaja com o Espantalho de Treino',shieldClassIds.has(state.classId)?'Bloqueie o projétil com o escudo':'Fale com a Mercadora Lia','Fale com a Mercadora Lia','Venda 1 item no mercado (role a lista até o botão Vender)','Fale com o Capitão Ulric no barco'];return map[Math.min(16,Math.max(0,state.tutorial))]||'Tutorial concluído';}
   const cityNPCs=[
     {x:3280,y:1600,name:'Capitã Selene',role:'captain',color:'#c65e72',icon:'⚔',homeX:3280,homeY:1600},
     {x:3185,y:1750,name:'Ferreiro Brann',role:'blacksmith',color:'#b8643e',icon:'🔨'},
@@ -2755,8 +2766,8 @@ function updateLivingWorld(dt){livingWorld.clock=(livingWorld.clock||0)+dt;refre
     // Guia de boas-vindas (não é a fala da Aurora): explica que é preciso ANDAR até ela e apertar E.
     setDialogue('Guia da Ilha',[
       `${appearance.name}, a Ilha do Alvorecer vai te ensinar a jogar na prática.`,
-      `🚶 A Mentora Aurora está mais ao norte, com um "!" dourado. Use ${tutorialCtrl().move} para andar até ela.`,
-      `✋ Quando chegar bem perto dela, aperte ${tutorialCtrl().interact} para falar e começar o treinamento.`
+      `A Mentora Aurora está logo ao NORTE, marcada com um "!" dourado.`,
+      `Segure ${tutorialCtrl().moveUp} para andar até ela — ao chegar bem perto, aperte ${tutorialCtrl().interact} para falar e começar o treinamento.`
     ]);
     saveGame();
   }

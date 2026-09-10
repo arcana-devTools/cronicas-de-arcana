@@ -220,6 +220,12 @@ curl -s https://ronaldogg120956-rgb.github.io/cronicas-de-arcana/ | grep -o "NOM
 
 ---
 
+- ✅ **v93 — Refino do tutorial de chegada à Aurora (etapa 0): W pra andar, depois E pra falar**:
+  - Melhoria em cima da v92 a pedido do dono: no ponto de nascimento **o aviso pede SÓ o W** (andar para CIMA) para ir até a Mentora Aurora; **quando o herói chega perto dela (raio ~175px), o aviso muda automaticamente para a tecla E**, pedindo que ele aperte E de verdade para falar e começar o tutorial.
+  - **`tutorialHint()`**: a etapa 0 agora é dinâmica (função de distância até a Aurora). Longe → `{text:ctrl.moveUp, keys:[up]}` (mostra só a tecla W); perto (<175px) → `{text:ctrl.interact, keys:[interact]}` (mostra E). Antes mostrava WASD e só falava em chegar.
+  - **`tutorialTaskText()`**: etapa 0 também dinâmica — "Ande até a Mentora Aurora (segure W)" quando longe, "Aperte E para falar com a Mentora Aurora" quando perto.
+  - **Texto do "Guia da Ilha"** (diálogo de nascimento): agora orienta "segure W para andar até ela — ao chegar bem perto, aperte E". `node --check` OK. sw.js → `arcana-v93`.
+
 - ✅ **v92 — Tutorial do início: forçado a ANDAR até a Mentora Aurora e apertar E**:
   - **Problema**: no jogo novo o herói nascia quase colado na Mentora Aurora (a ~1 palmo) e o jogo já abria um **diálogo automático dela** — o primeiro contato parecia automático e quase não exigia andar nem apertar E (não ensinava a interagir de verdade).
   - **Mudança** (só afeta jogo NOVO; saves de quem já passou/está no tutorial não mudam — compatível):
